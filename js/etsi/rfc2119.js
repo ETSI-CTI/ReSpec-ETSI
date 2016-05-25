@@ -1,4 +1,4 @@
-// Module w3c/rfc2119
+// Module etsi/rfc2119
 // update the 2119 terms section with the terms actually used
 
 define(
@@ -6,7 +6,7 @@ define(
     function (utils) {
         return {
             run:    function (conf, doc, cb, msg) {
-                msg.pub("start", "w3c/rfc2119");
+                msg.pub("start", "etsi/rfc2119");
                 var $confo = $("#respecRFC2119");
                 if ($confo.length) {
                     // do we have a list of used RFC2119 items in
@@ -35,7 +35,7 @@ define(
                         $confo.remove() ;
                     }
                 }
-                msg.pub("end", "w3c/rfc2119");
+                msg.pub("end", "etsi/rfc2119");
                 cb();
             }
         };

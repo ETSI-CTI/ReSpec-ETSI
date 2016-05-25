@@ -86,9 +86,11 @@
 //      - "w3c", currently the default (restrictive) license
 //      - "cc-by", which is experimentally available in some groups (but likely to be phased out).
 //          Note that this is a dual licensing regime.
-//      - "cc0", an extremely permissive license. It is only recommended if you are working on a document that is
-//          intended to be pushed to the WHATWG.
-//      - "w3c-software", a permissive and attributions license (but GPL-compatible).
+//      - "cc0", an extremely permissive license. This only works with the webspecs specStatus,
+//          and it is only recommended if you are working on a document that is intended to be
+//          pushed to the WHATWG
+//      - "w3c-software", a permissive and attributions license (but GPL-compatible). This is only
+//          available with webspecs and is the recommended value. It is the default for webspecs.
 //      - "w3c-software-doc", the W3C Software and Document License
 //            http://www.w3.org/Consortium/Legal/2015/copyright-software-and-document
 
@@ -97,12 +99,14 @@ define(
     [
         "handlebars"
     ,   "core/utils"
-    ,   "tmpl!w3c/templates/headers.html"
-    ,   "tmpl!w3c/templates/sotd.html"
-    ,   "tmpl!w3c/templates/cgbg-headers.html"
-    ,   "tmpl!w3c/templates/cgbg-sotd.html"
+    ,   "etsi/utils"
+    ,   "tmpl!etsi/templates/headers.html"
+    ,   "tmpl!etsi/templates/sotd.html"
+    ,   "tmpl!etsi/templates/cgbg-headers.html"
+    ,   "tmpl!etsi/templates/cgbg-sotd.html"
+    ,   "tmpl!etsi/templates/webspecs-headers.html"
     ],
-    function (hb, utils, headersTmpl, sotdTmpl, cgbgHeadersTmpl, cgbgSotdTmpl, wsHeadersTmpl) {
+    function (hb, utils, eutils, headersTmpl, sotdTmpl, cgbgHeadersTmpl, cgbgSotdTmpl, wsHeadersTmpl) {
         hb.registerHelper("showPeople", function (name, items) {
             // stuff to handle RDFa
             var re = "", rp = "", rm = "", rn = "", rwu = "", rpu = "", bn = "",
@@ -298,8 +302,11 @@ define(
                   url: "http://creativecommons.org/licenses/by/4.0/legalcode",
                 }
             }
+        ,   wg2title: {
+                "ITS" : "Intelligent Transport Systems (ITS)",
+            }
         ,   run:    function (conf, doc, cb, msg) {
-                msg.pub("start", "w3c/headers");
+                msg.pub("start", "etsi/headers");
                 // Default include RDFa document metadata
                 if (conf.doRDFa === undefined) conf.doRDFa = true;
                 // validate configuration and derive new configuration values
@@ -314,9 +321,25 @@ define(
                 conf.isCGBG = $.inArray(conf.specStatus, this.cgbg) >= 0;
                 conf.isCGFinal = conf.isCGBG && /G-FINAL$/.test(conf.specStatus);
                 conf.isBasic = (conf.specStatus === "base");
-                conf.isRegular = (!conf.isCGBG && !conf.isBasic);
-                if (!conf.specStatus) msg.pub("error", "Missing required configuration: specStatus");
-                if (conf.isRegular && !conf.shortName) msg.pub("error", "Missing required configuration: shortName");
+                conf.isWebSpec = (conf.specStatus === "webspec");
+                conf.isRegular = (!conf.isCGBG && !conf.isBasic && !conf.isWebSpec);
+                if (!conf.specStatus)  msg.pub("error", "Missing required configuration: specStatus");
+                if (!conf.specVersion) msg.pub("error", "Missing required ETSI configuration: specVersion");
+                if (conf.isRegular) {
+                    if (conf.shortName) {
+		        if (!conf.specType || !conf.specIndex) {
+		            var i = conf.shortName.search(/[^A-Z]/);
+		            conf.specType  = conf.shortName.substring(0, i);
+		            conf.specIndex = conf.shortName.substring(i).replace(" ","");
+		        }
+		    }else{
+		        if (!conf.specType)  msg.pub("error", "Missing required ETSI configuration: specType");
+		        if (!conf.specIndex) msg.pub("error", "Missing required ETSI configuration: specIndex");
+		        conf.shortName = eutils.etsiShortName(conf.specType, conf.specIndex);
+		    }
+		}
+
+                if (conf.isWebSpec && !conf.repository) msg.pub("error", "Missing required configuration: repository (as in 'darobin/respec')");
                 conf.title = doc.title || "No Title";
                 if (!conf.subtitle) conf.subtitle = "";
                 if (!conf.publishDate) {
@@ -342,12 +365,10 @@ define(
                 var publishSpace = "TR";
                 if (conf.specStatus === "Member-SUBM") publishSpace = "Submission";
                 else if (conf.specStatus === "Team-SUBM") publishSpace = "TeamSubmission";
-                if (conf.isRegular) conf.thisVersion =  "http://www.w3.org/" + publishSpace + "/" +
-                                                          conf.publishDate.getFullYear() + "/" +
-                                                          conf.maturity + "-" + conf.shortName + "-" +
-                                                          utils.concatDate(conf.publishDate) + "/";
+
+                if (conf.isRegular) conf.thisVersion = eutils.etsiDeliveryUrl(conf.specType, conf.specIndex, conf.specVersion, conf.specStatus);
                 if (conf.specStatus === "ED") conf.thisVersion = conf.edDraftURI;
-                if (conf.isRegular) conf.latestVersion = "http://www.w3.org/" + publishSpace + "/" + conf.shortName + "/";
+                if (conf.isRegular) conf.latestVersion = "http://www.etsi.org/deliver/" + publishSpace + "/" + conf.shortName + "/";
                 if (conf.isTagFinding) {
                     conf.latestVersion = "http://www.w3.org/2001/tag/doc/" + conf.shortName;
                     conf.thisVersion = conf.latestVersion + "-" + utils.concatDate(conf.publishDate, "-");
@@ -365,7 +386,7 @@ define(
                     else if (conf.isCGBG) {
                         conf.prevVersion = conf.prevVersion || "";
                     }
-                    else if (conf.isBasic) {
+                    else if (conf.isBasic || conf.isWebSpec) {
                         conf.prevVersion = "";
                     }
                     else {
@@ -460,9 +481,20 @@ define(
                     $("html").attr("prefix", prefixes);
                     $("html>head").prepend($("<meta lang='' property='dc:language' content='en'>"));
                 }
+                // add wgTitle to config
+                if ($.isArray(conf.wg)) {
+                    var wgTitles = [];
+                    for (var i = 0, n = conf.wg.length; i < n; i++)
+			if(this.wg2title[conf.wg[i]]) wgTitles.push(this.wg2title[conf.wg[i]]);
+                    conf.wgTitle = wgTitles.join(';');
+                }else{
+                    conf.wgTitle = this.wg2title[conf.wg] ? this.wg2title[conf.wg] : '';
+                }
+
                 // insert into document and mark with microformat
                 var bp;
                 if (conf.isCGBG) bp = cgbgHeadersTmpl(conf);
+                else if (conf.isWebSpec) bp = wsHeadersTmpl(conf);
                 else bp = headersTmpl(conf);
                 $("body", doc).prepend($(bp)).addClass("h-entry");
 
@@ -519,6 +551,7 @@ define(
                 if (conf.subjectPrefix !== "") conf.subjectPrefixEnc = encodeURIComponent(conf.subjectPrefix);
                 var sotd;
                 if (conf.isCGBG) sotd = cgbgSotdTmpl(conf);
+                else if (conf.isWebSpec) sotd = null;
                 else sotd = sotdTmpl(conf);
                 if (sotd) $(sotd).insertAfter($("#abstract"));
 
@@ -529,7 +562,7 @@ define(
                     msg.pub("error", "ReSpec does not support automated SotD generation for TAG findings, " +
                                      "please specify one using a <code><section></code> element with ID=sotd.");
                 }
-                msg.pub("end", "w3c/headers");
+                msg.pub("end", "etsi/headers");
                 cb();
             }
         };

@@ -1,10 +1,11 @@
 <div class='head'>
+  <h1 class="top-header">{{textStatus}} {{shortName}}</h1>
   <p>
       {{#if logos}}
         {{showLogos logos}}
       {{else}}
         {{#if prependW3C}}
-            <a class='logo' href='http://www.w3.org/'><img width='72' height='48' src='https://www.w3.org/StyleSheets/TR/2016/logos/W3C' alt='W3C'></a>
+            <a class='logo' href='http://www.etsi.org/'><img src='{{rootHtml}}/etsi-logo.jpg' alt='ETSI'></a>
             {{#if isMemberSubmission}}
             <a href="http://www.w3.org/Submission/"> <img height="48" width="211" alt="W3C Member Submission" src="http://www.w3.org/Icons/member_subm" /></a>
             {{/if}}
@@ -14,10 +15,9 @@
         {{/if}}
       {{/if}}
   </p>
-  <h1 class='title p-name' id='title'{{#if doRDFa}} property='dcterms:title'{{/if}}>{{title}}</h1>
-  {{#if subtitle}}
-    <h2 {{#if doRDFa}}property='bibo:subtitle' {{/if}}id='subtitle'>{{subtitle}}</h2>
-  {{/if}}
+  <h1 class='title p-name' id='title'{{#if doRDFa}} property='dcterms:title'{{/if}}>
+  	{{#if wgTitle}}{{wgTitle}};<br>{{/if}}{{title}}{{#if subtitle}};<br>{{subtitle}}{{/if}}
+  </h1>
   <h2>{{#if prependW3C}}W3C {{/if}}{{textStatus}} <time {{#if doRDFa}}property="dcterms:issued"{{/if}}class='dt-published' datetime='{{dashDate}}'>{{publishHumanDate}}</time></h2>
   <dl>
     {{#unless isNoTrack}}

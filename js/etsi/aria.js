@@ -1,4 +1,4 @@
-// Module w3c/aria
+// Module etsi/aria
 // Adds wai-aria landmarks and roles to entire document.
 // Introduced by Shane McCarron (shane@aptest.com) from the W3C PFWG
 
@@ -7,7 +7,7 @@ define(
     function (utils) {
         return {
             run:    function (conf, doc, cb, msg) {
-                msg.pub("start", "w3c/aria");
+                msg.pub("start", "etsi/aria");
                 // ensure head section is labelled
                 $('body', doc).attr('role', 'document') ;
                 $('body', doc).attr('id', 'respecDocument') ;
@@ -39,7 +39,7 @@ define(
                         $item.makeID('h', "note" + noteCount) ;
                     }
                 });
-                msg.pub("end", "w3c/aria");
+                msg.pub("end", "etsi/aria");
                 cb();
             }
         };

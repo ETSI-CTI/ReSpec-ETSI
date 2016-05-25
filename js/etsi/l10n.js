@@ -1,5 +1,5 @@
 
-// Module w3c/l10n
+// Module etsi/l10n
 // Looks at the lang attribute on the root element and uses it to manage the config.l10n object so
 // that other parts of the system can localise their text
 
@@ -73,10 +73,10 @@ define(
 
         return {
             run:    function (config, doc, cb, msg) {
-                msg.pub("start", "w3c/l10n");
+                msg.pub("start", "etsi/l10n");
                 var lang = $(doc.documentElement).attr("lang") || "en";
                 config.l10n = l10n[lang] ? l10n[lang] : l10n.en;
-                msg.pub("end", "w3c/l10n");
+                msg.pub("end", "etsi/l10n");
                 cb();
             }
         };

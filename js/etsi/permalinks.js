@@ -1,4 +1,4 @@
-// Module w3c/permalinks
+// Module etsi/permalinks
 // Adds "permalinks" into the document at sections with explicit IDs
 // Introduced by Shane McCarron (shane@aptest.com) from the W3C PFWG
 //
@@ -17,11 +17,11 @@
 //                         hovered over.  Defaults to false.
 
 define(
-    ["tmpl!w3c/templates/permalinks.css", "core/utils"], // load this to be sure that the jQuery extensions are loaded
+    ["tmpl!etsi/templates/permalinks.css", "core/utils"], // load this to be sure that the jQuery extensions are loaded
     function (css, utils) {
         return {
             run:    function (conf, doc, cb, msg) {
-                msg.pub("start", "w3c/permalinks");
+                msg.pub("start", "etsi/permalinks");
                 if (conf.includePermalinks) {
                     var symbol = conf.permalinkSymbol || '§';
                     var style = "<style>" + css(conf) + "</style>";
@@ -78,7 +78,7 @@ define(
                         }
                     });
                 };
-                msg.pub("end", "w3c/permalinks");
+                msg.pub("end", "etsi/permalinks");
                 cb();
             }
         };

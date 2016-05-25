@@ -1,5 +1,5 @@
 
-// Module w3c/abstract
+// Module etsi/abstract
 // Handle the abstract section properly.
 
 define(
@@ -7,7 +7,7 @@ define(
     function () {
         return {
             run:    function (conf, doc, cb, msg) {
-                msg.pub("start", "w3c/abstract");
+                msg.pub("start", "etsi/abstract");
                 var $abs = $("#abstract");
                 if ($abs.length) {
                     if ($abs.find("p").length === 0) $abs.contents().wrapAll($("<p></p>"));
@@ -21,7 +21,7 @@ define(
                     }
                 }
                 else msg.pub("error", "Document must have one element with ID 'abstract'");
-                msg.pub("end", "w3c/abstract");
+                msg.pub("end", "etsi/abstract");
                 cb();
             }
         };

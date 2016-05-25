@@ -43,6 +43,7 @@ define([
     "core/data-transform",
     "core/data-include",
     "core/inlines",
+    "etsi/inlines",
     "core/dfn",
     "etsi/rfc2119",
     "core/examples",
@@ -66,6 +67,7 @@ define([
     "core/shiv",
     "core/remove-respec",
     "core/location-hash",
+    "etsi/etsi-style",
     "ui/about-respec",
     "ui/dfn-list",
     "ui/save-html",
@@ -74,6 +76,9 @@ define([
   function(domReady, runner, ui) {
     var args = Array.from(arguments);
     domReady(function() {
+      
+      window.respecConfig["rootHtml"]= "file:///C:/Users/filatov/Work/NWM/CTILab/respec/etsi";
+
       ui.addCommand("Save Snapshot", "ui/save-html", "Ctrl+Shift+Alt+S");
       ui.addCommand("About ReSpec", "ui/about-respec", "Ctrl+Shift+Alt+A");
       ui.addCommand("Definition List", "ui/dfn-list", "Ctrl+Shift+Alt+D");
@@ -82,6 +87,9 @@ define([
         .runAll(args)
         .then(document.respecIsReady)
         .then(ui.show)
+        .then(function (){
+          parent.$('body').trigger( 'respecDone' )
+        })
         .catch(function(err){
           console.error(err);
           // even if things go critically bad, we should still try to show the UI

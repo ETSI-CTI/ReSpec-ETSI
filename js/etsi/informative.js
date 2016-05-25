@@ -1,5 +1,5 @@
 
-// Module w3c/informative
+// Module etsi/informative
 // Mark specific sections as informative, based on CSS
 
 define(
