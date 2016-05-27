@@ -42,7 +42,6 @@ define([
     "etsi/conformance",
     "core/data-transform",
     "core/data-include",
-    "core/inlines",
     "etsi/inlines",
     "core/dfn",
     "etsi/rfc2119",
@@ -77,7 +76,8 @@ define([
     var args = Array.from(arguments);
     domReady(function() {
       
-      window.respecConfig["rootHtml"]= "file:///C:/Users/filatov/Work/NWM/CTILab/respec/etsi";
+//      window.respecConfig["rootHtml"]= "file:///C:/Users/filatov/Work/NWM/CTILab/respec/etsi";
+      window.respecConfig["rootHtml"]= "http://ctilab.etsiqa.org/js/data";
 
       ui.addCommand("Save Snapshot", "ui/save-html", "Ctrl+Shift+Alt+S");
       ui.addCommand("About ReSpec", "ui/about-respec", "Ctrl+Shift+Alt+A");
