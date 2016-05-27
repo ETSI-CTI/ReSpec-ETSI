@@ -3,13 +3,17 @@
 */
 /*global hb*/
 
-// Module w3c/headers
+// Module etsi/headers
 // Generate the headers material based on the provided configuration.
 // CONFIGURATION
+//  - specType: the type of the document (EG, EN, ES, GS, GR, SR, TR, TS) (required)
+//  - specIndex: the number of the document in the form NNNNNN[-N-[N]] (required)
+//  - specVersion: the document version in the form NN.NN.NN (required)
 //  - specStatus: the short code for the specification's maturity level or type (required)
-//  - shortName: the small name that is used after /TR/ in published reports (required)
-//  - editors: an array of people editing the document (at least one is required). People
-//      are defined using:
+//  - shortName: the small name that is used in published reports. To be generated if omited.
+//  - workItem: ETSI work item (required)
+//  - editors: an array of people editing the document. Standard ETSI placeholder will be used if omited.
+//    People are defined using:
 //          - name: the person's name (required)
 //          - url: URI for the person's home page
 //          - company: the person's company
@@ -310,6 +314,7 @@ define(
                 // Default include RDFa document metadata
                 if (conf.doRDFa === undefined) conf.doRDFa = true;
                 // validate configuration and derive new configuration values
+                //TODO: set ETSI license
                 if (!conf.license) conf.license = (conf.specStatus === "webspec") ? "w3c-software" : "w3c";
                 conf.isCCBY = conf.license === "cc-by";
                 conf.isW3CSoftAndDocLicense = conf.license === "w3c-software-doc";
@@ -318,28 +323,31 @@ define(
                 if (conf.specStatus !== "webspec" && !$.inArray(conf.license, ["cc-by", "w3c"]))
                     msg.pub("error", "You cannot use that license with that type of document.");
                 conf.licenseInfo = this.licenses[conf.license];
+
                 conf.isCGBG = $.inArray(conf.specStatus, this.cgbg) >= 0;
                 conf.isCGFinal = conf.isCGBG && /G-FINAL$/.test(conf.specStatus);
                 conf.isBasic = (conf.specStatus === "base");
                 conf.isWebSpec = (conf.specStatus === "webspec");
                 conf.isRegular = (!conf.isCGBG && !conf.isBasic && !conf.isWebSpec);
+
+                //TODO: For ETSI specs
+                conf.isCGBG = conf.isCGFinal = conf.isBasic = conf.isWebSpec = false;
+                conf.isRegular = true;
+
                 if (!conf.specStatus)  msg.pub("error", "Missing required configuration: specStatus");
                 if (!conf.specVersion) msg.pub("error", "Missing required ETSI configuration: specVersion");
-                if (conf.isRegular) {
-                    if (conf.shortName) {
-		        if (!conf.specType || !conf.specIndex) {
-		            var i = conf.shortName.search(/[^A-Z]/);
-		            conf.specType  = conf.shortName.substring(0, i);
-		            conf.specIndex = conf.shortName.substring(i).replace(" ","");
-		        }
-		    }else{
-		        if (!conf.specType)  msg.pub("error", "Missing required ETSI configuration: specType");
-		        if (!conf.specIndex) msg.pub("error", "Missing required ETSI configuration: specIndex");
-		        conf.shortName = eutils.etsiShortName(conf.specType, conf.specIndex);
+                if (conf.shortName) {
+                    if (!conf.specType || !conf.specIndex) {
+		        var i = conf.shortName.search(/[^A-Z]/);
+		        if (!conf.specType)conf.specType  = conf.shortName.substring(0, i);
+		        if (!conf.specIndex)conf.specIndex = conf.shortName.substring(i).replace(" ","");
 		    }
+		}else{
+		    if (!conf.specType)  msg.pub("error", "Missing required ETSI configuration: specType");
+		    if (!conf.specIndex) msg.pub("error", "Missing required ETSI configuration: specIndex");
+		    conf.shortName = eutils.etsiShortName(conf.specType, conf.specIndex);
 		}
 
-                if (conf.isWebSpec && !conf.repository) msg.pub("error", "Missing required configuration: repository (as in 'darobin/respec')");
                 conf.title = doc.title || "No Title";
                 if (!conf.subtitle) conf.subtitle = "";
                 if (!conf.publishDate) {
@@ -349,6 +357,7 @@ define(
                     if (!(conf.publishDate instanceof Date)) conf.publishDate = utils.parseSimpleDate(conf.publishDate);
                 }
                 conf.publishYear = conf.publishDate.getFullYear();
+                conf.publishYearAndMonth = conf.publishDate.getFullYear() + "-" + (conf.publishDate.getMonth()+1);
                 conf.publishHumanDate = utils.humanDate(conf.publishDate);
                 conf.isNoTrack = $.inArray(conf.specStatus, this.noTrackStatus) >= 0;
                 conf.isRecTrack = conf.noRecTrack ? false : $.inArray(conf.specStatus, this.recTrackStatus) >= 0;
@@ -357,50 +366,20 @@ define(
                 conf.isSubmission = conf.isMemberSubmission || conf.isTeamSubmission;
                 conf.anOrA = $.inArray(conf.specStatus, this.precededByAn) >= 0 ? "an" : "a";
                 conf.isTagFinding = conf.specStatus === "finding" || conf.specStatus === "draft-finding";
-                if (!conf.edDraftURI) {
-                    conf.edDraftURI = "";
-                    if (conf.specStatus === "ED") msg.pub("warn", "Editor's Drafts should set edDraftURI.");
-                }
-                conf.maturity = (this.status2maturity[conf.specStatus]) ? this.status2maturity[conf.specStatus] : conf.specStatus;
-                var publishSpace = "TR";
-                if (conf.specStatus === "Member-SUBM") publishSpace = "Submission";
-                else if (conf.specStatus === "Team-SUBM") publishSpace = "TeamSubmission";
 
-                if (conf.isRegular) conf.thisVersion = eutils.etsiDeliveryUrl(conf.specType, conf.specIndex, conf.specVersion, conf.specStatus);
-                if (conf.specStatus === "ED") conf.thisVersion = conf.edDraftURI;
-                if (conf.isRegular) conf.latestVersion = "http://www.etsi.org/deliver/" + publishSpace + "/" + conf.shortName + "/";
-                if (conf.isTagFinding) {
-                    conf.latestVersion = "http://www.w3.org/2001/tag/doc/" + conf.shortName;
-                    conf.thisVersion = conf.latestVersion + "-" + utils.concatDate(conf.publishDate, "-");
+                conf.maturity = (this.status2maturity[conf.specStatus]) ? this.status2maturity[conf.specStatus] : conf.specStatus;
+
+                conf.thisVersion = eutils.etsiDeliveryUrl(conf.specType, conf.specIndex, conf.specVersion, conf.specStatus);
+
+                if (!conf.editors || conf.editors.length === 0) {
+                  // add default editor
+                    conf.editors = [{ name:       "ETSI Secretariat",
+                                      url:        "http://www.etsi.org",
+                                      company:    "ETSI",
+                                      companyURL: "http://www.etsi.org/" }
+                    ];
                 }
-                if (conf.previousPublishDate) {
-                    if (!conf.previousMaturity && !conf.isTagFinding)
-                        msg.pub("error", "previousPublishDate is set, but not previousMaturity");
-                    if (!(conf.previousPublishDate instanceof Date))
-                        conf.previousPublishDate = utils.parseSimpleDate(conf.previousPublishDate);
-                    var pmat = (this.status2maturity[conf.previousMaturity]) ? this.status2maturity[conf.previousMaturity] :
-                                                                               conf.previousMaturity;
-                    if (conf.isTagFinding) {
-                        conf.prevVersion = conf.latestVersion + "-" + utils.concatDate(conf.previousPublishDate, "-");
-                    }
-                    else if (conf.isCGBG) {
-                        conf.prevVersion = conf.prevVersion || "";
-                    }
-                    else if (conf.isBasic || conf.isWebSpec) {
-                        conf.prevVersion = "";
-                    }
-                    else {
-                        conf.prevVersion = "http://www.w3.org/TR/" + conf.previousPublishDate.getFullYear() + "/" + pmat + "-" +
-                                           conf.shortName + "-" + utils.concatDate(conf.previousPublishDate) + "/";
-                    }
-                }
-                else {
-                    if (!/NOTE$/.test(conf.specStatus) && conf.specStatus !== "FPWD" && conf.specStatus !== "FPLC" && conf.specStatus !== "ED" && !conf.noRecTrack && !conf.isNoTrack && !conf.isSubmission)
-                        msg.pub("error", "Document on track but no previous version: Add previousMaturity previousPublishDate to ReSpec's config.");
-                    if (!conf.prevVersion) conf.prevVersion = "";
-                }
-                if (conf.prevRecShortname && !conf.prevRecURI) conf.prevRecURI = "http://www.w3.org/TR/" + conf.prevRecShortname;
-                if (!conf.editors || conf.editors.length === 0) msg.pub("error", "At least one editor is required");
+
                 var peopCheck = function (it) {
                     if (!it.name) msg.pub("error", "All authors and editors must have a name.");
                 };
@@ -412,6 +391,7 @@ define(
                 }
                 conf.multipleEditors = conf.editors && conf.editors.length > 1;
                 conf.multipleAuthors = conf.authors && conf.authors.length > 1;
+
                 $.each(conf.alternateFormats || [], function (i, it) {
                     if (!it.uri || !it.label) msg.pub("error", "All alternate formats must have a uri and a label.");
                 });
@@ -421,6 +401,7 @@ define(
                     optional += (alt.hasOwnProperty("type") && alt.type) ? " type='" + alt.type + "'" : "";
                     return "<a rel='alternate' href='" + alt.uri + "'" + optional + ">" + alt.label + "</a>";
                 });
+
                 if (conf.bugTracker) {
                     if (conf.bugTracker["new"] && conf.bugTracker.open) {
                         conf.bugTrackerHTML = "<a href='" + conf.bugTracker["new"] + "'>" + conf.l10n.file_a_bug + "</a> " +
@@ -445,32 +426,29 @@ define(
                     conf.rdfStatus = this.status2rdf[conf.specStatus];
                 }
                 conf.showThisVersion =  (!conf.isNoTrack || conf.isTagFinding);
-                conf.showPreviousVersion = (conf.specStatus !== "FPWD" && conf.specStatus !== "FPLC" && conf.specStatus !== "ED" && !conf.isNoTrack && !conf.isSubmission);
-                if (/NOTE$/.test(conf.specStatus) && !conf.prevVersion) conf.showPreviousVersion = false;
-                if (conf.isTagFinding) conf.showPreviousVersion = conf.previousPublishDate ? true : false;
-                conf.notYetRec = (conf.isRecTrack && conf.specStatus !== "REC");
-                conf.isRec = (conf.isRecTrack && conf.specStatus === "REC");
-                if (conf.isRec && !conf.errata)
-                    msg.pub("error", "Recommendations must have an errata link.");
-                conf.notRec = (conf.specStatus !== "REC");
-                conf.isUnofficial = conf.specStatus === "unofficial";
-                conf.prependW3C = !conf.isUnofficial;
-                conf.isED = (conf.specStatus === "ED");
-                conf.isLC = (conf.specStatus === "LC" || conf.specStatus === "FPLC");
-                conf.isCR = (conf.specStatus === "CR");
-                conf.isPR = (conf.specStatus === "PR");
-                conf.isPER = (conf.specStatus === "PER");
-                conf.isMO = (conf.specStatus === "MO");
-                conf.isIGNote = (conf.specStatus === "IG-NOTE");
+                conf.showPreviousVersion = false;
+                conf.prependW3C = false;
+            	conf.isEG = (conf.specType === "EG");
+            	conf.isEN = (conf.specType === "EN");
+            	conf.isES = (conf.specType === "ES");
+            	conf.isGS = (conf.specType === "GS");
+            	conf.isGR = (conf.specType === "GR");
+            	conf.isSR = (conf.specType === "SR");
+            	conf.isTS = (conf.specType === "TS");
+            	conf.isTR = (conf.specType === "TR");
                 conf.dashDate = utils.concatDate(conf.publishDate, "-");
                 conf.publishISODate = utils.isoDate(conf.publishDate);
                 conf.shortISODate = conf.publishISODate.replace(/T.*/, "");
-                conf.processVersion = conf.processVersion || "2015";
-                if (conf.processVersion == "2014") {
-                    msg.pub("warn", "Process " + conf.processVersion + " has been superceded by Process 2015.");
-                    conf.processVersion = "2015";
+
+                // set wgTitle
+                if ($.isArray(conf.wg)) {
+                    var wgTitles = [];
+                    for (var i = 0, n = conf.wg.length; i < n; i++)
+			if(this.wg2title[conf.wg[i]]) wgTitles.push(this.wg2title[conf.wg[i]]);
+                    conf.wgTitle = wgTitles.join(';');
+                }else{
+                    conf.wgTitle = this.wg2title[conf.wg] ? this.wg2title[conf.wg] : '';
                 }
-                conf.isNewProcess = conf.processVersion == "2015";
                 // configuration done - yay!
 
                 // annotate html element with RFDa
@@ -480,15 +458,6 @@ define(
                     var prefixes = "bibo: http://purl.org/ontology/bibo/ w3p: http://www.w3.org/2001/02pd/rec54#";
                     $("html").attr("prefix", prefixes);
                     $("html>head").prepend($("<meta lang='' property='dc:language' content='en'>"));
-                }
-                // add wgTitle to config
-                if ($.isArray(conf.wg)) {
-                    var wgTitles = [];
-                    for (var i = 0, n = conf.wg.length; i < n; i++)
-			if(this.wg2title[conf.wg[i]]) wgTitles.push(this.wg2title[conf.wg[i]]);
-                    conf.wgTitle = wgTitles.join(';');
-                }else{
-                    conf.wgTitle = this.wg2title[conf.wg] ? this.wg2title[conf.wg] : '';
                 }
 
                 // insert into document and mark with microformat

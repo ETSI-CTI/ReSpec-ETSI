@@ -1,35 +1,22 @@
 <div class='head'>
-  <h1 class="top-header">{{textStatus}} {{shortName}}</h1>
-  <p>
-      {{#if logos}}
-        {{showLogos logos}}
-      {{else}}
-        {{#if prependW3C}}
-            <a class='logo' href='http://www.etsi.org/'><img src='{{rootHtml}}/etsi-logo.jpg' alt='ETSI'></a>
-            {{#if isMemberSubmission}}
-            <a href="http://www.w3.org/Submission/"> <img height="48" width="211" alt="W3C Member Submission" src="http://www.w3.org/Icons/member_subm" /></a>
-            {{/if}}
-            {{#if isTeamSubmission}}
-            <a href="http://www.w3.org/TeamSubmission/"><img height="48" width="211" alt="W3C Team Submission" src="http://www.w3.org/Icons/team_subm"/></a>
-            {{/if}}
-        {{/if}}
-      {{/if}}
-  </p>
+  <h1 class="top-header">{{textStatus}} {{shortName}} v{{specVersion}}({{publishYearAndMonth}})</h1>
+  <p><a class='logo' href='http://www.etsi.org/'><img src='{{rootHtml}}/etsi-logo.jpg' alt='ETSI'></a></p>
   <h1 class='title p-name' id='title'{{#if doRDFa}} property='dcterms:title'{{/if}}>
   	{{#if wgTitle}}{{wgTitle}};<br>{{/if}}{{title}}{{#if subtitle}};<br>{{subtitle}}{{/if}}
   </h1>
-  <h2>{{#if prependW3C}}W3C {{/if}}{{textStatus}} <time {{#if doRDFa}}property="dcterms:issued"{{/if}}class='dt-published' datetime='{{dashDate}}'>{{publishHumanDate}}</time></h2>
+  {{#if logos}}
+      {{showLogos logos}}
+  {{/if}}
+<!--  <h2>{{textStatus}} <time {{#if doRDFa}}property="dcterms:issued"{{/if}}class='dt-published' datetime='{{dashDate}}'>{{publishHumanDate}}</time></h2> -->
   <dl>
     {{#unless isNoTrack}}
       <dt>{{l10n.this_version}}</dt>
       <dd><a class='u-url' href='{{thisVersion}}'>{{thisVersion}}</a></dd>
+<!--
       <dt>{{l10n.latest_published_version}}</dt>
       <dd>{{#if latestVersion}}<a href='{{latestVersion}}'>{{latestVersion}}</a>{{else}}none{{/if}}</dd>
+-->
     {{/unless}}
-    {{#if edDraftURI}}
-      <dt>{{l10n.latest_editors_draft}}</dt>
-      <dd><a href='{{edDraftURI}}'>{{edDraftURI}}</a></dd>
-    {{/if}}
     {{#if testSuiteURI}}
       <dt>Test suite:</dt>
       <dd><a href='{{testSuiteURI}}'>{{testSuiteURI}}</a></dd>
@@ -41,25 +28,6 @@
     {{#if bugTrackerHTML}}
       <dt>{{l10n.bug_tracker}}</dt>
       <dd>{{{bugTrackerHTML}}}</dd>
-    {{/if}}
-    {{#if isED}}
-      {{#if prevED}}
-        <dt>Previous editor's draft:</dt>
-        <dd><a href='{{prevED}}'>{{prevED}}</a></dd>
-      {{/if}}
-    {{/if}}
-    {{#if showPreviousVersion}}
-      <dt>Previous version:</dt>
-      <dd><a {{#if doRDFa}}rel="dcterms:replaces"{{/if}} href='{{prevVersion}}'>{{prevVersion}}</a></dd>
-    {{/if}}
-    {{#if prevRecURI}}
-      {{#if isRec}}
-          <dt>Previous Recommendation:</dt>
-          <dd><a {{#if doRDFa}}rel="dcterms:replaces"{{/if}} href='{{prevRecURI}}'>{{prevRecURI}}</a></dd>
-      {{else}}
-          <dt>Latest Recommendation:</dt>
-          <dd><a href='{{prevRecURI}}'>{{prevRecURI}}</a></dd>
-      {{/if}}
     {{/if}}
     <dt>{{#if multipleEditors}}{{l10n.editors}}{{else}}{{l10n.editor}}{{/if}}</dt>
     {{showPeople "Editor" editors}}
@@ -104,6 +72,9 @@
       {{/each}}
     {{/if}}
   </dl>
+
+  
+  
   {{#if errata}}
     <p>
       Please check the <a href="{{errata}}"><strong>errata</strong></a> for any errors or issues
