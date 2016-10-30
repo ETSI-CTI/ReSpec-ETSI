@@ -20,12 +20,17 @@ define(
                 ,   status_at_publication:      "This section describes the status of this document at the time of its publication. Other documents may supersede this document. A list of current W3C publications and the latest revision of this technical report can be found in the <a href='http://www.w3.org/TR/'>W3C technical reports index</a> at http://www.w3.org/TR/."
                 ,   toc:                        "Table of Contents"
                 ,   note:                       "Note"
-                ,   fig:                        "Fig. "
+                ,   fig:                        "Figure "
                 ,   bug_tracker:                "Bug tracker:"
                 ,   file_a_bug:                 "file a bug"
                 ,   open_bugs:                  "open bugs"
                 ,   open_parens:                "("
                 ,   close_parens:               ")"
+                ,   ipr:                        "Intellectual Property Rights"
+                ,   forewords:                  "Forewords"
+                ,   equation:                   "Eq."
+
+
             }
             ,   ko: {
                     this_version:               "현재 버전:"
@@ -46,6 +51,9 @@ define(
                 ,   open_bugs:                  "open bugs"
                 ,   open_parens:                "("
                 ,   close_parens:               ")"
+                ,   ipr:                        "Intellectual Property Rights"
+                ,   forewords:                  "Forewords"
+                ,   equation:                   "Eq."
             }
             ,   zh: {
                     this_version:               "本版本："
@@ -66,6 +74,9 @@ define(
                 ,   open_bugs:                  "修正中的错误"
                 ,   open_parens:                "（"
                 ,   close_parens:               "）"
+                ,   ipr:                        "Intellectual Property Rights"
+                ,   forewords:                  "Forewords"
+                ,   equation:                   "Eq."
             }
         };
         l10n["zh-hans"] = l10n.zh;

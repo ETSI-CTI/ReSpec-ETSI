@@ -51,6 +51,7 @@ define([
     "core/highlight",
     "core/best-practices",
     "core/figures",
+    "etsi/equations",
     "core/biblio",
     "core/webidl-contiguous",
     "core/webidl-oldschool",

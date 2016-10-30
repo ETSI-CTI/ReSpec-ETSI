@@ -357,7 +357,7 @@ define(
                     if (!(conf.publishDate instanceof Date)) conf.publishDate = utils.parseSimpleDate(conf.publishDate);
                 }
                 conf.publishYear = conf.publishDate.getFullYear();
-                conf.publishYearAndMonth = conf.publishDate.getFullYear() + "-" + (conf.publishDate.getMonth()+1);
+                conf.publishYearAndMonth = conf.publishDate.getFullYear() + "-" + (conf.publishDate.getMonth()<9?'0':'') + (conf.publishDate.getMonth()+1);
                 conf.publishHumanDate = utils.humanDate(conf.publishDate);
                 conf.isNoTrack = $.inArray(conf.specStatus, this.noTrackStatus) >= 0;
                 conf.isRecTrack = conf.noRecTrack ? false : $.inArray(conf.specStatus, this.recTrackStatus) >= 0;
@@ -469,8 +469,8 @@ define(
 
                 // handle SotD
                 var $sotd = $("#sotd");
-                if ((conf.isCGBG || !conf.isNoTrack || conf.isTagFinding) && !$sotd.length)
-                    msg.pub("error", "A custom SotD paragraph is required for your type of document.");
+                // if ((conf.isCGBG || !conf.isNoTrack || conf.isTagFinding) && !$sotd.length)
+                //    msg.pub("error", "A custom SotD paragraph is required for your type of document.");
                 conf.sotdCustomParagraph = $sotd.html();
                 $sotd.remove();
                 // NOTE:
@@ -522,7 +522,7 @@ define(
                 if (conf.isCGBG) sotd = cgbgSotdTmpl(conf);
                 else if (conf.isWebSpec) sotd = null;
                 else sotd = sotdTmpl(conf);
-                if (sotd) $(sotd).insertAfter($("#abstract"));
+                if (sotd) $(sotd).insertBefore($("#abstract"));
 
                 if (!conf.implementationReportURI && (conf.isCR || conf.isPR || conf.isRec)) {
                     msg.pub("error", "CR, PR, and REC documents need to have an implementationReportURI defined.");

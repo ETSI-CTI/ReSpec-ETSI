@@ -65,7 +65,7 @@ define(
                 var abbrRx = aKeys.length ? "(?:\\b" + aKeys.join("\\b)|(?:\\b") + "\\b)" : null;
 
                 // PROCESSING
-                var txts = $("body", doc).allTextNodes(["pre"]);
+                var txts = $("section:not(.introductory)", doc).allTextNodes(['pre', 'h1', 'h2', 'h3', 'h4', 'h5']);
                 var rx = new RegExp("(\\bMUST(?:\\s+NOT)?\\b|" +
                                      "\\bSHOULD(?:\\s+NOT)?\\b|" +
                                      "\\bSHALL(?:\\s+NOT)?\\b|" +

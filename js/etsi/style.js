@@ -1,6 +1,6 @@
 /*jshint strict: true, browser:true, jquery: true*/
 /*globals define*/
-// Module etsi/style
+// Module w3c/style
 // Inserts a link to the appropriate W3C style for the specification's maturity level.
 // CONFIGURATION
 //  - specStatus: the short code for the specification's maturity level or type (required)
@@ -47,7 +47,7 @@ define(
 
       return {
         run: function(conf, doc, cb, msg) {
-          msg.pub("start", "etsi/style");
+          msg.pub("start", "w3c/style");
 
           if (!conf.specStatus) {
             var warn = "'specStatus' missing from ReSpec config. Defaulting to 'base'.";
@@ -109,7 +109,7 @@ define(
           finalStyleURL += styleFile;
 
           utils.linkCSS(doc, finalStyleURL);
-          msg.pub("end", "etsi/style");
+          msg.pub("end", "w3c/style");
           cb();
         }
       };

@@ -11,7 +11,9 @@ define(
                 var $abs = $("#abstract");
                 if ($abs.length) {
                     if ($abs.find("p").length === 0) $abs.contents().wrapAll($("<p></p>"));
-                    $abs.prepend("<h2>" + conf.l10n.abstract + "</h2>");
+                    if($abs.find("h1,h2,h3") === 0){
+                    	$abs.prepend("<h1>" + conf.l10n.abstract + "</h1>");
+                    }
                     $abs.addClass("introductory");
                     if (conf.doRDFa) {
                         var rel = "dc:abstract"
