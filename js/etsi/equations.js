@@ -27,7 +27,7 @@ define(
                 });
 
                 // Update all anchors with empty content that reference a figure ID
-                $("a[href^=#]", doc).each(function () {
+                $("a[href^='#']", doc).each(function () {
                     var $a = $(this)
                     ,   id = $a.attr("href");
                     if (!id) return;
