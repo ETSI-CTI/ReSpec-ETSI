@@ -35,12 +35,12 @@ define(
                 });
 
                 // process all figures
-                var figMap = {}, tof = [], num = 0;
+                var figMap = {}, figIdx={}, tof = [], num = 0;
                 $("figure").each(function () {
                     var $fig = $(this)
                     ,   $cap = $fig.find("figcaption")
                     ,   tit = $cap.text()
-                    ,   id = $fig.makeID("fig", tit);
+                    ,   id = $fig.id || $fig.makeID("fig", tit);
                     if (!$cap.length) pubsubhub.pub("warn", "A <figure> should contain a <figcaption>.");
 
                     // set proper caption title
@@ -50,7 +50,8 @@ define(
                         .prepend($("<span class='figno'>" + num + "</span>"))
                         .prepend(doc.createTextNode(conf.l10n.fig))
                     ;
-                    figMap[id] = $cap.contents();
+                    figMap[id] = $cap.contents().clone();
+                    figIdx[id] = num;
                     var $tofCap = $cap.clone();
                     $tofCap.find("a").renameElement("span").removeAttr("href");
                     tof.push($("<li class='tofline'><a class='tocxref' href='#" + id + "'></a></li>")
@@ -67,7 +68,7 @@ define(
                     id = id.substring(1);
                     if (figMap[id]) {
                         $a.addClass("fig-ref");
-                        if ($a.html() === "") $a.append(figMap[id].clone());
+                        if ($a.html() === "" || $a.html().startsWith(conf.l10n.fig)) $a.html(conf.l10n.fig + ' ' + figIdx[id]);
                     }
                 });
 
