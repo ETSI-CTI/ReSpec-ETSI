@@ -1,0 +1,182 @@
+<div class='head'>
+  <h1 class="top-header">{{textStatus}} {{shortName}} v{{specVersion}} ({{publishYearAndMonth}})</h1>
+  <p><a class='logo etsi-logo' href='http://www.etsi.org/'><!--img src='{{rootHtml}}/etsi-logo.jpg' alt='ETSI'--></a></p>
+  <h1 class='title p-name' id='title'{{#if doRDFa}} property='dcterms:title'{{/if}}>
+  	{{#if wgTitle}}{{wgTitle}};<br>{{/if}}{{title}}{{#if subtitle}};<br>{{subtitle}}{{/if}}
+  </h1>
+  {{#if logos}}
+      {{showLogos logos}}
+  {{/if}}
+<!--  <h2>{{textStatus}} <time {{#if doRDFa}}property="dcterms:issued"{{/if}}class='dt-published' datetime='{{dashDate}}'>{{publishHumanDate}}</time></h2> -->
+  <dl>
+    {{#unless isNoTrack}}
+      <dt>{{l10n.this_version}}</dt>
+      <dd><a class='u-url' href='{{thisVersion}}'>{{thisVersion}}</a></dd>
+<!--
+      <dt>{{l10n.latest_published_version}}</dt>
+      <dd>{{#if latestVersion}}<a href='{{latestVersion}}'>{{latestVersion}}</a>{{else}}none{{/if}}</dd>
+-->
+    {{/unless}}
+    {{#if testSuiteURI}}
+      <dt>Test suite:</dt>
+      <dd><a href='{{testSuiteURI}}'>{{testSuiteURI}}</a></dd>
+    {{/if}}
+    {{#if implementationReportURI}}
+      <dt>Implementation report:</dt>
+      <dd><a href='{{implementationReportURI}}'>{{implementationReportURI}}</a></dd>
+    {{/if}}
+    {{#if bugTrackerHTML}}
+      <dt>{{l10n.bug_tracker}}</dt>
+      <dd>{{{bugTrackerHTML}}}</dd>
+    {{/if}}
+    <dt>{{#if multipleEditors}}{{l10n.editors}}{{else}}{{l10n.editor}}{{/if}}</dt>
+    {{showPeople "Editor" editors}}
+    {{#if authors}}
+      <dt>{{#if multipleAuthors}}{{l10n.authors}}{{else}}{{l10n.author}}{{/if}}</dt>
+      {{showPeople "Author" authors}}
+    {{/if}}
+    {{#if otherLinks}}
+      {{#each otherLinks}}
+        {{#if key}}
+          <dt {{#if class}}class="{{class}}"{{/if}}>{{key}}:</dt>
+          {{#if data}}
+             {{#each data}}
+                {{#if value}}
+                  <dd {{#if class}}class="{{class}}"{{/if}}>
+                    {{#if href}}<a href="{{href}}">{{/if}}
+                      {{value}}
+                    {{#if href}}</a>{{/if}}
+                  </dd>
+                {{else}}
+                  {{#if href}}
+                    <dd><a href="{{href}}">{{href}}</a></dd>
+                  {{/if}}
+                {{/if}}
+             {{/each}}
+          {{else}}
+            {{#if value}}
+              <dd {{#if class}}class="{{class}}"{{/if}}>
+                {{#if href}}<a href="{{href}}">{{/if}}
+                  {{value}}
+                {{#if href}}</a>{{/if}}
+              </dd>
+            {{else}}
+              {{#if href}}
+                <dd {{#if class}}class="{{class}}"{{/if}}>
+                  <a href="{{href}}">{{href}}</a>
+                </dd>
+              {{/if}}
+            {{/if}}
+          {{/if}}
+        {{/if}}
+      {{/each}}
+    {{/if}}
+  </dl>
+
+  
+  
+  {{#if errata}}
+    <p>
+      Please check the <a href="{{errata}}"><strong>errata</strong></a> for any errors or issues
+      reported since publication.
+    </p>
+  {{/if}}
+  {{#if alternateFormats}}
+    <p>
+      {{#if multipleAlternates}}
+        This document is also available in these non-normative formats:
+      {{else}}
+        This document is also available in this non-normative format:
+      {{/if}}
+      {{{alternatesHTML}}}
+    </p>
+  {{/if}}
+  {{#if isRec}}
+    <p>
+      The English version of this specification is the only normative version. Non-normative
+      <a href="http://www.w3.org/Consortium/Translation/">translations</a> may also be available.
+    </p>
+  {{/if}}
+  {{#if isUnofficial}}
+    {{#if additionalCopyrightHolders}}
+      <p class='copyright'>{{{additionalCopyrightHolders}}}</p>
+    {{else}}
+      {{#if overrideCopyright}}
+        {{{overrideCopyright}}}
+      {{else}}
+        <p class='copyright'>
+          This document is licensed under a
+          <a class='subfoot' href='http://creativecommons.org/licenses/by/3.0/' rel='license'>Creative Commons
+          Attribution 3.0 License</a>.
+        </p>
+      {{/if}}
+    {{/if}}
+  {{else}}
+    {{#if overrideCopyright}}
+      {{{overrideCopyright}}}
+    {{else}}
+      <div id="copyright" class="center">
+       <p class="strong">ETSI</p>
+       <p>650 Route des Lucioles F-06921 Sophia Antipolis Cedex - FRANCE</p>
+       <p>Tel.: +33 4 92 94 42 00  Fax: +33 4 93 65 47 16</p>
+       <p>Siret N° 348 623 562 00017 - NAF 742 C<br/>
+          Association à but non lucratif enregistrée à la Sous-Préfecture de Grasse (06) N° 7803/88</p>
+<!--
+       <p class="strong">Important notice</strong></p>
+       <p>Individual copies of the present document can be downloaded from: <a href="http://www.etsi.org">http://www.etsi.org</a>.</p>
+       <p>The present document may be made available in more than one electronic version or in print. In any case of existing or
+          perceived difference in contents between such versions, the reference version is the Portable Document Format (PDF).
+          In case of dispute, the reference shall be the printing on ETSI printers of the PDF version kept on a specific network drive
+          within ETSI Secretariat.</p>
+       <p>Users of the present document should be aware that the document may be subject to revision or change of status.
+          Information on the current status of this and other ETSI documents is available at
+          <a href="http://portal.etsi.org/tb/status/status.asp">http://portal.etsi.org/tb/status/status.asp</a></p>
+       <p>If you find errors in the present document, please send your comment to one of the following services:
+          <a href="http://portal.etsi.org/chaircor/ETSI_support.asp">http://portal.etsi.org/chaircor/ETSI_support.asp</a></p>
+-->
+       <p class="strong">Copyright Notification</p>
+       <p>No part may be reproduced except as authorized by written permission.
+          The copyright and the foregoing restriction extend to reproduction in all media.<br/>
+          &copy; <a href="http://www.etsi.org">European Telecommunications Standards Institute</a> {{#if copyrightStart}}{{copyrightStart}}-{{/if}}{{publishYear}}.<br/>
+          All rights reserved. <br/>
+          {{#if additionalCopyrightHolders}}{{{additionalCopyrightHolders}}}, {{/if}}
+          <abbr title="Digital Enhanced Cordless Telecommunications">DECT</abbr><sup>&trade;</sup>, 
+          <abbr>PLUGTESTS</abbr><sup>&trade;</sup>,
+          <abbr title="Universal Mobile Telecommunications System">UMTS</abbr><sup>&trade;</sup>
+          and the <a href="http://www.etsi.org">ETSI</a> logo are Trade Marks of <a href="http://www.etsi.org">ETSI</a> registered for the benefit of its Members.<br/>
+          <a href="http://www.3gpp.org"><abbr title="The 3rd Generation Partnership Project">3GPP</abbr><sup>&trade;</sup></a> and 
+          <abbr title="Long-Term Evolution">LTE</abbr><sup>&trade;</sup>
+          are Trade Marks of <a href="http://www.etsi.org">ETSI</a> registered for the benefit of its Members and of the <a href="http://www.3gpp.org">3GPP</a> Organizational Partners.<br/>
+          <abbr title="Global System for Mobile Communications">GSM</abbr><sup>&reg;</sup> and the <abbr title="Global System for Mobile Communications">GSM</abbr> logo are Trade Marks registered and owned by the <a href="http://www.gsma.com">GSM Association<a/>.</p>
+      </div>
+      <!--
+      <p class='copyright'>
+        <a href='http://www.w3.org/Consortium/Legal/ipr-notice#Copyright'>Copyright</a> &copy;
+        {{#if copyrightStart}}{{copyrightStart}}-{{/if}}{{publishYear}}
+        {{#if additionalCopyrightHolders}} {{{additionalCopyrightHolders}}} &amp;{{/if}}
+        <a href='http://www.w3.org/'><abbr title='World Wide Web Consortium'>W3C</abbr></a><sup>&reg;</sup>
+        (<a href='http://www.csail.mit.edu/'><abbr title='Massachusetts Institute of Technology'>MIT</abbr></a>,
+        <a href='http://www.ercim.eu/'><abbr title='European Research Consortium for Informatics and Mathematics'>ERCIM</abbr></a>,
+        <a href='http://www.keio.ac.jp/'>Keio</a>, <a href="http://ev.buaa.edu.cn/">Beihang</a>). 
+        {{#if isCCBY}}
+          Some Rights Reserved: this document is dual-licensed,
+          <a rel="license" href="https://creativecommons.org/licenses/by/3.0/">CC-BY</a> and
+          <a rel="license" href="http://www.w3.org/Consortium/Legal/copyright-documents">W3C Document License</a>.
+        {{/if}}
+        W3C <a href='http://www.w3.org/Consortium/Legal/ipr-notice#Legal_Disclaimer'>liability</a>,
+        <a href='http://www.w3.org/Consortium/Legal/ipr-notice#W3C_Trademarks'>trademark</a> and
+        {{#if isCCBY}}
+          <a rel="license" href='http://www.w3.org/Consortium/Legal/2013/copyright-documents-dual.html'>document use</a>
+        {{else}}
+          {{#if isW3CSoftAndDocLicense}}
+            <a rel="license" href='http://www.w3.org/Consortium/Legal/2015/copyright-software-and-document'>permissive document license</a>
+          {{else}}
+            <a rel="license" href='http://www.w3.org/Consortium/Legal/copyright-documents'>document use</a>
+          {{/if}}
+        {{/if}}
+        rules apply.
+      </p> -->
+    {{/if}}
+  {{/if}}
+  <hr title="Separator for header">
+</div>

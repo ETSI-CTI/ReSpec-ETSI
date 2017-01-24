@@ -16,34 +16,65 @@
 //    the counter is not used.
 
 define(
-    ["core/pubsubhub"],
-    function (pubsubhub) {
+    [],
+    function () {
         return {
-            run:    function (conf, doc, cb) {
+            run:    function (conf, doc, cb, msg) {
+                msg.pub("start", "etsi/inlines");
                 doc.normalize();
+
                 if (!conf.normativeReferences) conf.normativeReferences = {};
                 if (!conf.informativeReferences) conf.informativeReferences = {};
                 if (!conf.respecRFC2119) conf.respecRFC2119 = {};
 
                 // PRE-PROCESSING
                 var abbrMap = {}, acroMap = {};
+                var aKeys = [];
                 $("abbr[title]", doc).each(function () { abbrMap[$(this).text()] = $(this).attr("title"); });
                 $("acronym[title]", doc).each(function () { acroMap[$(this).text()] = $(this).attr("title"); });
-                var aKeys = [];
-                for (var k in abbrMap) aKeys.push(k);
-                for (var k in acroMap) aKeys.push(k);
-                aKeys.sort(function (a, b) {
-                    if (b.length < a.length) return -1;
-                    if (a.length < b.length) return 1;
-                    return 0;
-                });
+
+                var abbrSection = doc.getElementById("abbreviations");
+                if(abbrSection){
+                    var $as = $(abbrSection);
+                    // get abbreviations from the section
+                    $as.children("p").each(function(){
+                        var a = $(this).text();
+                        var i = a.indexOf('\xa0'); // &nbsp;
+                        if(i > 0){
+                            abbrMap[a.substring(0,i)] = a.substr(i).trim();
+                        }
+                    });
+                    for (var k in abbrMap) aKeys.push(k);
+                    for (var k in acroMap) aKeys.push(k);
+                    aKeys.sort();
+                    // Fill in abbreviation section
+                    $as.empty();
+                    $("<h2>Abbreviations</h2>").appendTo($as);
+                    var $t = $("<table style='width:100%;'></table>");
+                    for (var i in aKeys) {
+                        var k = aKeys[i];
+                        if(abbrMap[k]) {
+                            $("<tr><td style='white-space:nowrap;'><abbr title='"+abbrMap[k]+"'>"+k+"</abbr></td><td style='width: 99%;'>"+abbrMap[k]+"</td></tr>").appendTo($t);
+                        }else{
+                            $("<tr><td style='white-space:nowrap;'><acronym title='"+acroMap[k]+"'>"+k+"</acronym></td><td style='width: 99%;'>"+acroMap[k]+"</td></tr>").appendTo($t);
+                        }
+                    }
+                    $as.append($t);
+		}
+                
                 var abbrRx = aKeys.length ? "(?:\\b" + aKeys.join("\\b)|(?:\\b") + "\\b)" : null;
 
                 // PROCESSING
-                var txts = $("body", doc).allTextNodes(["pre"]);
-                var rx = new RegExp("(\\bMUST(?:\\s+NOT)?\\b|\\bSHOULD(?:\\s+NOT)?\\b|\\bSHALL(?:\\s+NOT)?\\b|" +
-                                    "\\bMAY\\b|\\b(?:NOT\\s+)?REQUIRED\\b|\\b(?:NOT\\s+)?RECOMMENDED\\b|\\bOPTIONAL\\b|" +
-                                    "(?:\\[\\[(?:!|\\\\)?[A-Za-z0-9\\.-\\s]+\\]\\])" + ( abbrRx ? "|" + abbrRx : "") + ")");
+                var txts = $("section:not(.introductory)", doc).allTextNodes(['pre', 'h1', 'h2', 'h3', 'h4', 'h5']);
+                var rx = new RegExp("(\\bMUST(?:\\s+NOT)?\\b|" +
+                                     "\\bSHOULD(?:\\s+NOT)?\\b|" +
+                                     "\\bSHALL(?:\\s+NOT)?\\b|" +
+                                     "\\bWILL(?:\\s+NOT)?\\b|" +
+                                     "\\bCAN(?:NOT)?\\b|" +
+                                     "\\bMAY\\b|" +
+                                     "\\bNEED\\s+NOT\\b|" +
+                                     "(?:\\[\\[(?:!|\\\\)?[A-Za-z0-9\\.-]+\\]\\])" + 
+                                     ( abbrRx ? "|" + abbrRx : "") + ")", "i");
                 for (var i = 0; i < txts.length; i++) {
                     var txt = txts[i];
                     var subtxt = txt.data.split(rx);
@@ -56,10 +87,13 @@ define(
                         if (subtxt.length) matched = subtxt.shift();
                         df.appendChild(doc.createTextNode(t));
                         if (matched) {
-                            // RFC 2119
-                            if (/MUST(?:\s+NOT)?|SHOULD(?:\s+NOT)?|SHALL(?:\s+NOT)?|MAY|(?:NOT\s+)?REQUIRED|(?:NOT\s+)?RECOMMENDED|OPTIONAL/.test(matched)) {
+                            // ETSI Drafting Rules
+                            if (/MUST(?:\s+NOT)?/i.test(matched)) {
                                 matched = matched.split(/\s+/).join(" ");
-                                df.appendChild($("<em/>").attr({ "class": "rfc2119", title: matched }).text(matched)[0]);
+                                df.appendChild($("<em/>").attr({ "class": "edr-error", title: "Words MUST and MUST NOT are NOT allowed in ETSI deliverables except when used in direct citation" }).text(matched)[0]);
+                            }else if (/SHOULD(?:\s+NOT)?|SHALL(?:\s+NOT)?|WILL(?:\s+NOT)?|CAN(?:NOT)?|MAY|NEED\sNOT/i.test(matched)) {
+                                matched = matched.split(/\s+/).join(" ");
+                                df.appendChild($("<em/>").attr({ "class": "rfc2119 edr-modal", title: matched }).text(matched)[0]);
                                 // remember which ones were used
                                 conf.respecRFC2119[matched] = true;
                             }
@@ -95,14 +129,11 @@ define(
                                 if ($(txt).parents("acronym").length) df.appendChild(doc.createTextNode(matched));
                                 else df.appendChild($("<acronym/>").attr({ title: acroMap[matched] }).text(matched)[0]);
                             }
-                            // FAIL -- not sure that this can really happen
-                            else {
-                                pubsubhub.pub("error", "Found token '" + matched + "' but it does not correspond to anything");
-                            }
                         }
                     }
                     txt.parentNode.replaceChild(df, txt);
                 }
+                msg.pub("end", "etsi/inlines");
                 cb();
             }
         };
